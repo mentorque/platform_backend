@@ -67,10 +67,20 @@ const createAppliedJob = async (req, res) => {
     const userId = user.id;
 
     // Validate required fields
-    if (!id || !title || !url) {
+    if (!id || !title) {
       return res.status(400).json({ 
-        error: 'Missing required fields: id, title, and url are required' 
+        error: 'Missing required fields: id and title are required' 
       });
+    }
+
+    // Validate status if provided
+    if (status) {
+      const validStatuses = ['Applied', 'In Progress', 'Got Call Back', 'Received Offer', 'Rejected'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: 'Invalid status. Must be one of: Applied, In Progress, Got Call Back, Received Offer, Rejected' 
+        });
+      }
     }
 
     // Note: Removed duplicate URL check to allow manual entries with same URLs
@@ -83,7 +93,7 @@ const createAppliedJob = async (req, res) => {
         title,
         company: company || null,
         location: location || null,
-        url,
+        url: url || '#',
         appliedText: appliedText || null,
         appliedDate: appliedDate ? new Date(appliedDate) : new Date(),
         status: status || 'Applied',
@@ -114,11 +124,11 @@ const updateJobStatus = async (req, res) => {
     console.log('📝 Update job status request:', { firebaseUid: uid, dbUserId: userId, jobId, status });
 
     // Validate status
-    const validStatuses = ['Applied', 'In Progress', 'Got Call Back', 'Rejected'];
+    const validStatuses = ['Applied', 'In Progress', 'Got Call Back', 'Received Offer', 'Rejected'];
     if (!validStatuses.includes(status)) {
       console.log('❌ Invalid status:', status);
       return res.status(400).json({ 
-        error: 'Invalid status. Must be one of: Applied, In Progress, Got Call Back, Rejected' 
+        error: 'Invalid status. Must be one of: Applied, In Progress, Got Call Back, Received Offer, Rejected' 
       });
     }
 
